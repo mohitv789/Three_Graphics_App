@@ -1,0 +1,16 @@
+<div class="home-container">
+  <header>
+    <h1>My Projects</h1>
+    <button class="create-btn" (click)="createNewProject()">+ New Project</button>
+  </header>
+
+  <div class="project-grid">
+    <div
+      *ngFor="let project of (projects$ | async)"
+      class="project-card"
+      (click)="openProject(project.project_id)"
+    >
+      <h3>{{ project.project_id || 'Unknown' }}</h3>
+    </div>
+  </div>
+</div>

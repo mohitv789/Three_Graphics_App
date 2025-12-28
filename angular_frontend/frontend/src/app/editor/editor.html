@@ -1,0 +1,84 @@
+<div class="editor-root">
+
+  <!-- =========================
+       Top Toolbar
+  ========================== -->
+  <div class="editor-toolbar">
+    <button class="btn ghost"
+            (click)="commandsService.undo()"
+            [disabled]="!commandsService.canUndo()">
+      Undo
+    </button>
+
+    <button class="btn ghost"
+            (click)="commandsService.redo()"
+            [disabled]="!commandsService.canRedo()">
+      Redo
+    </button>
+
+    <button class="btn ghost" (click)="recenterOnSelection()">
+      Re-center
+    </button>
+
+    <button class="btn primary"
+            (click)="saveScene()"
+            [disabled]="saving">
+      Save Scene
+    </button>
+  </div>
+
+  <!-- =========================
+       Sidebar (Scene Explorer)
+  ========================== -->
+  <div class="editor-sidebar-wrapper">
+    <app-editor-sidebar></app-editor-sidebar>
+  </div>
+
+  <!-- =========================
+       Canvas
+  ========================== -->
+  <div class="editor-canvas-wrapper">
+    <canvas #canvas></canvas>
+  </div>
+
+  <!-- =========================
+       Bottom Row (Toolstrip + Inspector)
+       50% / 50%
+  ========================== -->
+  <div class="editor-bottom-row">
+
+  <!-- LEFT: Toolstrip (50%) -->
+  <div class="editor-toolstrip">
+
+    <div class="tool-group">
+      <span class="toolbar-label">Add</span>
+      <button class="btn ghost" (click)="addCube()">Cube</button>
+      <button class="btn ghost" (click)="addSphere()">Sphere</button>
+      <button class="btn ghost" (click)="addCylinder()">Cylinder</button>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="tool-group">
+      <span class="toolbar-label">Transform</span>
+      <button class="btn ghost" (click)="setTransform('translate')">Move</button>
+      <button class="btn ghost" (click)="setTransform('rotate')">Rotate</button>
+      <button class="btn ghost" (click)="setTransform('scale')">Scale</button>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="tool-group">
+      <span class="toolbar-label">Color</span>
+      <button class="color-swatch red"   (click)="changeColor(16711680)"></button>
+      <button class="color-swatch green" (click)="changeColor(65280)"></button>
+      <button class="color-swatch blue"  (click)="changeColor(255)"></button>
+      <button class="color-swatch white" (click)="changeColor(16777215)"></button>
+    </div>
+
+  </div>
+  <div class="editor-inspector">
+    <app-object-inspector></app-object-inspector>
+  </div>
+</div>
+

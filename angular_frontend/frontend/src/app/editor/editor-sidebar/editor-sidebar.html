@@ -1,0 +1,15 @@
+<div class="scene-sidebar">
+  <div class="sidebar-title">Scene</div>
+
+  <div
+    class="scene-item"
+    *ngFor="let obj of objects$ | async; trackBy: trackById"
+    (click)="select(obj)"
+    [class.selected]="(selected$ | async) === obj"
+  >
+    <span class="icon">⬛</span>
+    <span class="name">
+      {{getDisplayName(obj)}}
+    </span>
+  </div>
+</div>

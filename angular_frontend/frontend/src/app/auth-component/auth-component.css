@@ -1,0 +1,105 @@
+/* =========================
+   Page Container
+   ========================= */
+.auth-container {
+  max-width: 380px;
+  margin: 80px auto;
+  padding: 28px 26px;
+  background: #1e1e1e;
+  border-radius: 10px;
+  border: 1px solid #2f2f2f;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  color: #e6e6e6;
+}
+
+/* =========================
+   Title
+   ========================= */
+.auth-container h2 {
+  margin: 0 0 22px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* =========================
+   Form Groups
+   ========================= */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #b5b5b5;
+}
+
+/* =========================
+   Inputs
+   ========================= */
+.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #3a3a3a;
+  background: #262626;
+  color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus {
+  border-color: #1abc9c;
+  box-shadow: 0 0 0 1px rgba(26, 188, 156, 0.4);
+}
+
+/* =========================
+   Submit Button
+   ========================= */
+.btn-primary {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: #1abc9c;
+  color: #0b2f2a;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.btn-primary:hover {
+  background: #16a085;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================
+   Mode Switch
+   ========================= */
+.switch-mode {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #9ad1ff;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,38 @@
+.scene-sidebar {
+  width: 240px;
+  background: #1e1e1e;
+  color: #ddd;
+  height: 100%;
+  border-right: 1px solid #333;
+  padding: 8px;
+  overflow-y: auto;
+}
+
+.sidebar-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #aaa;
+}
+
+.scene-item {
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scene-item:hover {
+  background: #2a2a2a;
+}
+
+.scene-item.selected {
+  background: #094771;
+  color: #fff;
+}
+
+.icon {
+  font-size: 10px;
+}
