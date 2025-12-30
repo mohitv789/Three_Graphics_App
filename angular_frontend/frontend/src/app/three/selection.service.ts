@@ -5,19 +5,23 @@ import { Object3D } from 'three';
 
 export interface SelectedObjectDTO {
   objectId: string;
+
   transform: {
     position: [number, number, number];
-    rotation: [number, number, number];
+    rotation: [number, number, number]; // radians
     scale: [number, number, number];
   };
+
   material?: {
-    color?: string;
+    color: string; // '#rrggbb'
   };
 }
+
 
 @Injectable({ providedIn: 'root' })
 export class SelectionService {
   private selectedSubject = new BehaviorSubject<Object3D | null>(null);
+  private _activeMaterialIndex = 0;
 
   private raycaster = new THREE.Raycaster();
   private mouse = new THREE.Vector2();
@@ -29,6 +33,24 @@ export class SelectionService {
   selected$ = this.selectedSubject.asObservable();
   /** Observable used by UI (Inspector, panels, AI, etc.) */
   selection$ = this.selectedObject$.asObservable();
+  private extractMaterialDTO(
+    mesh: Object3D
+  ): SelectedObjectDTO['material'] | undefined {
+
+    if (!(mesh instanceof THREE.Mesh)) return undefined;
+
+    const mat = Array.isArray(mesh.material)
+      ? mesh.material[0]
+      : mesh.material;
+
+    if (!mat || !('color' in mat) || !mat.color) {
+      return undefined;
+    }
+
+    return {
+      color: `#${mat.color.getHexString()}`
+    };
+  }
 
   /** Internal raycast selection */
   select(
@@ -64,19 +86,11 @@ export class SelectionService {
 
   private setSelectedMesh(mesh: THREE.Object3D): void {
     this.selectedMesh = mesh;
-
-    let material;
-
-    if (mesh instanceof THREE.Mesh) {
-      const mat = mesh.material;
-
-      material = Array.isArray(mat)
-        ? { color: mat[0]?.color?.getHexString?.() }
-        : { color: mat?.color?.getHexString?.() };
-    }
+    this._activeMaterialIndex = 0; // reset on new selection
 
     this.selectedSubject.next(mesh);
-    const dto: SelectedObjectDTO = {
+
+    this.selectedObject$.next({
       objectId: mesh.userData['objectId'],
       transform: {
         position: mesh.position.toArray() as [number, number, number],
@@ -87,13 +101,19 @@ export class SelectionService {
         ],
         scale: mesh.scale.toArray() as [number, number, number]
       },
-      material
-    };
-
-    this.selectedObject$.next(dto);
-
+      material: this.extractMaterialDTO(mesh)
+    });
   }
 
+
+  get activeMaterialIndex(): number {
+    return this._activeMaterialIndex;
+  }
+
+  setActiveMaterialIndex(index: number): void {
+    this._activeMaterialIndex = index;
+    this.refreshSelectionDTO();
+  }
 
   clearSelection(): void {
     this.selectedMesh = null;
@@ -112,5 +132,27 @@ export class SelectionService {
 
   setSelected(mesh: THREE.Object3D): void {
     this.setSelectedMesh(mesh);
+  }
+
+
+  refreshSelectionDTO(): void {
+    if (!this.selectedMesh) return;
+
+    const mesh = this.selectedMesh;
+
+    this.selectedObject$.next({
+      objectId: mesh.userData['objectId'],
+      transform: {
+        position: mesh.position.toArray() as [number, number, number],
+        rotation: [
+          mesh.rotation.x,
+          mesh.rotation.y,
+          mesh.rotation.z
+        ],
+        scale: mesh.scale.toArray() as [number, number, number]
+      },
+      material: this.extractMaterialDTO(mesh)
+
+    });
   }
 }

@@ -1,57 +1,99 @@
 import { Command } from './command';
 import { THREE } from '../../three/three';
 import { SelectionService } from '../../three/selection.service';
+import { ObjectService } from '../../three/objects.service';
 
 export class ChangeMaterialCommand implements Command {
 
-  private previousColors: number[] | null = null;
+  private previousHex?: string; // WITHOUT '#'
 
   constructor(
     private mesh: THREE.Mesh,
-    private newColor: number,
-    private selectionService: SelectionService
+    private nextColor: number,
+    private selectionService: SelectionService,
+    private objectService: ObjectService,
+    private projectId: string
   ) {}
 
   execute(): void {
-    const materials = this.getStandardMaterials();
-    if (!materials.length) return;
+    const mat = this.getMaterial();
+    if (!mat?.color) return;
 
-    this.previousColors = materials.map(m => m.color.getHex());
-    materials.forEach(m => m.color.setHex(this.newColor));
+    // 1️⃣ Store previous color (undo)
+    this.previousHex = mat.color.getHexString();
 
+    // 2️⃣ Apply locally (UX)
+    mat.color.setHex(this.nextColor);
+    mat.needsUpdate = true;
+
+    // 3️⃣ Persist
+    this.persist(`#${this.nextColor.toString(16).padStart(6, '0')}`);
+
+    // 4️⃣ Refresh inspector
     this.selectionService.setSelected(this.mesh);
   }
 
   undo(): void {
-    if (!this.previousColors) return;
+    if (!this.previousHex) return;
 
-    const materials = this.getStandardMaterials();
-    if (materials.length !== this.previousColors.length) return;
+    const mat = this.getMaterial();
+    if (!mat?.color) return;
 
-    materials.forEach((m, i) =>
-      m.color.setHex(this.previousColors![i])
-    );
+    // 1️⃣ Restore locally
+    mat.color.set('#' + this.previousHex);
+    mat.needsUpdate = true;
 
+    // 2️⃣ Persist rollback
+    this.persist('#' + this.previousHex);
+
+    // 3️⃣ Refresh inspector
     this.selectionService.setSelected(this.mesh);
   }
 
-  /**
-   * Narrow material type safely
-   */
-  private getStandardMaterials(): THREE.MeshStandardMaterial[] {
+  // =========================
+  // Backend persistence
+  // =========================
+
+  private persist(color: string): void {
+    const objectId = this.mesh.userData['objectId'];
+    const payload = this.mesh.userData['payload'];
+
+    // Not yet persisted → local-only
+    if (!objectId || objectId.startsWith('temp#')) return;
+    if (!payload) return;
+
+    const updatedPayload = {
+      ...payload,
+      material: {
+        ...payload.material,
+        color
+      }
+    };
+
+    this.objectService
+      .update(this.projectId, objectId, updatedPayload)
+      .subscribe({
+        error: () => console.error('Failed to update material')
+      });
+
+    // Keep local canonical state in sync
+    this.mesh.userData['payload'] = updatedPayload;
+  }
+
+  // =========================
+  // Type-safe material access
+  // =========================
+
+  private getMaterial(): THREE.MeshStandardMaterial | null {
     const mat = this.mesh.material;
 
     if (Array.isArray(mat)) {
-      return mat.filter(
+      return mat.find(
         (m): m is THREE.MeshStandardMaterial =>
           m instanceof THREE.MeshStandardMaterial
-      );
+      ) ?? null;
     }
 
-    if (mat instanceof THREE.MeshStandardMaterial) {
-      return [mat];
-    }
-
-    return [];
+    return mat instanceof THREE.MeshStandardMaterial ? mat : null;
   }
 }

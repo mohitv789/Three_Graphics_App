@@ -4,7 +4,6 @@ import { ObjectService } from '../../three/objects.service';
 import { THREE } from '../../three/three';
 
 export class AddCubeCommand implements Command {
-
   private mesh!: THREE.Mesh;
   private objectId!: string;
 
@@ -13,25 +12,32 @@ export class AddCubeCommand implements Command {
     private objectService: ObjectService,
     private projectId: string
   ) {}
-
   execute(): void {
-    // 1️⃣ Create mesh locally (default transform)
+    // render immediately
     this.mesh = this.sceneService.addCube();
 
-    // 🔴 Payload MUST NOT contain transforms
     const payload = {
-      type: 'mesh',
-      geometry: 'box',
-      material: { color: '#ff0000' }
+      kind: 'mesh',
+      geometry: {
+        type: 'box',
+        params: { width: 1, height: 1, depth: 1 }
+      },
+      material: {
+        type: 'standard',
+        color: '#ff0000'
+      },
+      schema_version: 1
     };
 
-    // 2️⃣ Persist object definition only
+    // 🔴 CRITICAL: attach payload BEFORE backend call
+    this.mesh.userData['payload'] = payload;
+
     this.objectService.create(this.projectId, payload)
-      .subscribe((res: any) => {
-        this.objectId = res.object_id;
-        this.mesh.userData['objectId'] = res.object_id;
+      .subscribe((res:any) => {
+        this.mesh.userData['objectId'] = res['object_id'];
       });
   }
+
 
   undo(): void {
     if (!this.objectId) {
@@ -39,8 +45,14 @@ export class AddCubeCommand implements Command {
       return;
     }
 
+    /**
+     * 1️⃣ Remove from scene (UX)
+     */
     this.sceneService.removeObject(this.mesh);
 
+    /**
+     * 2️⃣ Remove from backend (authority)
+     */
     this.objectService
       .delete(this.projectId, this.objectId)
       .subscribe();

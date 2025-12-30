@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BASE_URL } from '../config';
-import { extractObjectUuid } from '../core/utils/object-utils.service';
 
 @Injectable({ providedIn: 'root' })
 export class ObjectService {

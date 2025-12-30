@@ -27,3 +27,4 @@ class ProjectEntityViewSet(ModelViewSet):
             queryset = queryset.filter(entity_type=entity_type)
 
         return queryset
+    

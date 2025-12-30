@@ -51,19 +51,6 @@ export class SceneService {
     this.emitObjects();
   }
 
-  addCube(): THREE.Mesh {
-    const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    geometry.translate(0, 0.5, 0); // move geometry, not mesh
-
-    const cube = new THREE.Mesh(geometry, material);
-    cube.position.set(0, 0, 0);
-
-    cube.userData['type'] = 'cube';
-    this.objectsGroup.add(cube);
-    this.emitObjects();               // 🔴 IMPORTANT
-    return cube;
-  }
 
   removeObject(object: THREE.Object3D): void {
     this.objectsGroup.remove(object);
@@ -132,20 +119,39 @@ export class SceneService {
   createMeshFromObjectPayload(payload: any): THREE.Mesh {
     let geometry: THREE.BufferGeometry;
 
-    switch (payload.geometry) {
-      case 'sphere':
-        geometry = new THREE.SphereGeometry(0.5, 32, 32);
+    switch (payload.geometry?.type) {
+      case 'sphere': {
+        const p = payload.geometry.params;
+        geometry = new THREE.SphereGeometry(
+          p.radius ?? 0.5,
+          p.widthSegments ?? 32,
+          p.heightSegments ?? 16
+        );
         break;
+      }
 
-      case 'cylinder':
-        geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
+      case 'cylinder': {
+        const p = payload.geometry.params;
+        geometry = new THREE.CylinderGeometry(
+          p.radiusTop ?? 0.5,
+          p.radiusBottom ?? 0.5,
+          p.height ?? 1,
+          p.radialSegments ?? 32
+        );
         break;
+      }
 
       case 'box':
-      default:
-        geometry = new THREE.BoxGeometry(1, 1, 1);
-        geometry.translate(0, 0.5, 0);
+      default: {
+        const p = payload.geometry.params;
+        geometry = new THREE.BoxGeometry(
+          p.width ?? 1,
+          p.height ?? 1,
+          p.depth ?? 1
+        );
+        geometry.translate(0, (p.height ?? 1) / 2, 0);
         break;
+      }
     }
 
     const material = new THREE.MeshStandardMaterial({
@@ -153,10 +159,14 @@ export class SceneService {
     });
 
     const mesh = new THREE.Mesh(geometry, material);
-    mesh.userData['type'] = payload.geometry;
+
+    // 🔑 REQUIRED for updates & undo
+    mesh.userData['payload'] = payload;
+    mesh.userData['type'] = payload.geometry.type;
 
     return mesh;
   }
+
 
   syncWorldMatrices(): void {
     this.objectsGroup.children.forEach(obj => {
@@ -171,6 +181,26 @@ export class SceneService {
     Promise.resolve().then(() => {
       this.objectsSubject.next([...this.objectsGroup.children]);
     });
+  }
+
+  addCube(): THREE.Mesh {
+  // Renderer-only concerns
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xff0000
+    });
+
+    const cube = new THREE.Mesh(geometry, material);
+
+    // Default transform (scene-level, not geometry-level)
+    cube.position.set(0, 0.5, 0);
+
+    // Identity only (no schema, no intent)
+    cube.userData['objectId'] = null;
+
+    this.objectsGroup.add(cube);
+    this.emitObjects();
+    return cube;
   }
 
   // three/scene.service.ts

@@ -1,61 +1,84 @@
-<div class="inspector">
+<div class="inspector" *ngIf="selection$ | async as obj; else empty">
 
-  <ng-container *ngIf="(selection$ | async) as obj; else empty">
+  <h4>Object Details</h4>
 
-    <h4>Object Details</h4>
+  <!-- =========================
+       Transform
+  ========================== -->
+  <div class="section">
+    <h5>Transform</h5>
+
+    <!-- POSITION -->
+    <div class="row">
+      <label>Position</label>
+      <div class="vec3">
+        <input type="number" step="0.01"
+               [value]="obj.transform.position[0]"
+               (change)="updateTransform('position', 0, $event.target.value)" />
+
+        <input type="number" step="0.01"
+               [value]="obj.transform.position[1]"
+               (change)="updateTransform('position', 1, $event.target.value)" />
+
+        <input type="number" step="0.01"
+               [value]="obj.transform.position[2]"
+               (change)="updateTransform('position', 2, $event.target.value)" />
+      </div>
+    </div>
+
+    <!-- ROTATION -->
+    <div class="row">
+      <label>Rotation (°)</label>
+      <div class="vec3">
+        <input type="number" step="1"
+               [value]="radToDeg(obj.transform.rotation[0])"
+               (change)="updateRotation(0, $event.target.value)" />
+
+        <input type="number" step="1"
+               [value]="radToDeg(obj.transform.rotation[1])"
+               (change)="updateRotation(1, $event.target.value)" />
+
+        <input type="number" step="1"
+               [value]="radToDeg(obj.transform.rotation[2])"
+               (change)="updateRotation(2, $event.target.value)" />
+      </div>
+    </div>
+
+    <!-- SCALE -->
+    <div class="row">
+      <label>Scale</label>
+      <div class="vec3">
+        <input type="number" step="0.01" min="0.01"
+               [value]="obj.transform.scale[0]"
+               (change)="updateTransform('scale', 0, $event.target.value)" />
+
+        <input type="number" step="0.01" min="0.01"
+               [value]="obj.transform.scale[1]"
+               (change)="updateTransform('scale', 1, $event.target.value)" />
+
+        <input type="number" step="0.01" min="0.01"
+               [value]="obj.transform.scale[2]"
+               (change)="updateTransform('scale', 2, $event.target.value)" />
+      </div>
+    </div>
+  </div>
+
+  <div class="section" *ngIf="obj.material">
+    <h5>Material</h5>
 
     <div class="row">
-      <label>ID</label>
-      <span class="mono">{{ obj.objectId }}</span>
+      <label>Color</label>
+      <input
+        type="color"
+        [value]="obj.material.color"
+        (input)="updateMaterialColor($any($event.target).value)" />
     </div>
-
-    <div class="section">
-      <h5>Transform</h5>
-
-      <div class="row">
-        <label>Position</label>
-        <span>
-          {{ obj.transform.position[0] | number:'1.2-2' }},
-          {{ obj.transform.position[1] | number:'1.2-2' }},
-          {{ obj.transform.position[2] | number:'1.2-2' }}
-        </span>
-      </div>
-
-      <div class="row">
-        <label>Rotation</label>
-        <span>
-          {{ obj.transform.rotation[0] | number:'1.2-2' }},
-          {{ obj.transform.rotation[1] | number:'1.2-2' }},
-          {{ obj.transform.rotation[2] | number:'1.2-2' }}
-        </span>
-      </div>
-
-      <div class="row">
-        <label>Scale</label>
-        <span>
-          {{ obj.transform.scale[0] | number:'1.2-2' }},
-          {{ obj.transform.scale[1] | number:'1.2-2' }},
-          {{ obj.transform.scale[2] | number:'1.2-2' }}
-        </span>
-      </div>
-    </div>
-
-    <div class="section" *ngIf="obj.material?.color as color">
-      <h5>Material</h5>
-      <div class="row">
-        <label>Color</label>
-        <span class="color">#{{ color }}</span>
-        <span class="swatch" [style.background]="'#' + color"></span>
-      </div>
-    </div>
-
-  </ng-container>
-
-  <ng-template #empty>
-    <div class="inspector empty">
-      No object selected
-    </div>
-  </ng-template>
+  </div>
 
 </div>
 
+<ng-template #empty>
+  <div class="inspector empty">
+    No object selected
+  </div>
+</ng-template>

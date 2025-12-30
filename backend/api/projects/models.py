@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from core.models import TimeStampedModel
+from uuid import uuid4
 
 class ProjectEntity(TimeStampedModel):
     ENTITY_TYPES = (

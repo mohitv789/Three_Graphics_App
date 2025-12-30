@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { log } from 'three';
 
 @Injectable({ providedIn: 'root' })
 export class ProjectService {
@@ -64,4 +65,29 @@ export class ProjectService {
       { withCredentials: true }
     );
   }
+
+  // project.service.ts
+
+  updateObject(
+    projectId: string,
+    objectId: string,
+    payload: {
+      position?: number[];
+      quaternion?: number[];
+      scale?: number[];
+      material?: {
+        color?: string;
+      };
+    }
+  ) {
+    console.log('Updating object :',objectId );
+    return this.http.put(
+      `/api/projects/${projectId}/objects/${objectId}/`,
+      payload,
+      { withCredentials: true }
+    );
+  }
+
+
+  
 }

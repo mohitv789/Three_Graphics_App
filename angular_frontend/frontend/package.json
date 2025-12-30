@@ -30,6 +30,7 @@
     "three": "^0.182.0",
     "three-stdlib": "^2.36.1",
     "tslib": "^2.3.0",
+    "uuid": "^13.0.0",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {

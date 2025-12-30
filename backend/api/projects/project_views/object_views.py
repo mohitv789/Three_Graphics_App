@@ -30,7 +30,7 @@ class ObjectListCreateView(APIView):
         serializer = ObjectPayloadSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        object_id = f"object#{uuid.uuid4()}"
+        object_id = f"{uuid.uuid4()}"
 
         ProjectEntity.objects.create(
             project_id=project_id,

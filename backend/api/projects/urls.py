@@ -12,7 +12,11 @@ from .project_views.object_views import (
     ObjectUpdateView,
     ObjectDeleteView,
 )
-
+from .project_views.object_views import (
+    ObjectListCreateView,
+    ObjectUpdateView,
+    ObjectDeleteView,
+)
 router = DefaultRouter()
 router.register(
     r"entities",
@@ -29,8 +33,7 @@ urlpatterns = [
     # Objects
     path("<str:project_id>/objects/", ObjectListCreateView.as_view()),
     path("<str:project_id>/objects/<str:object_id>/", ObjectUpdateView.as_view()),
-    path("<str:project_id>/objects/<str:object_id>", ObjectDeleteView.as_view()),
-
+    path("<str:project_id>/objects/<str:object_id>/", ObjectDeleteView.as_view()),
     # Low-level entity APIs (internal/admin/debug)
     path("", include(router.urls)),
 ]

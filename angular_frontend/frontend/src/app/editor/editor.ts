@@ -85,16 +85,17 @@ export class EditorComponent implements OnInit, AfterViewInit {
     this.rendererService.domElement.style.touchAction = 'none';
 
     /* 4️⃣ Selection → Transform binding */
-    this.selectionService.selected$.subscribe(obj => {
+    this.selectionService.selection$.subscribe(obj => {
       if (obj) {
-        this.transformService.attach(obj);
+        this.transformService.attach(this.selectionService.getSelectedMesh()!);
       } else {
         this.transformService.detach();
       }
     });
 
+
     /* 5️⃣ Transform commit hook */
-    this.transformService.onTransformCommit = (obj) => {
+    this.transformService.commitTransform = (obj: any) => {
       this.sceneService.commitObjectTransform(obj);
     };
 
@@ -194,7 +195,9 @@ export class EditorComponent implements OnInit, AfterViewInit {
     const cmd = new ChangeMaterialCommand(
       mesh,
       hex,
-      this.selectionService
+      this.selectionService,
+      this.objectService,
+      this.projectId
     );
 
     this.commandsService.execute(cmd);
@@ -266,6 +269,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
 
                 mesh.userData['objectId'] = ref.object_id;
+                mesh.userData['payload'] = ref.payload;
                 this.sceneService.registerLoadedObject(mesh);
               });
 
